@@ -331,7 +331,13 @@
   // If iterator is a string, sort objects by that property with the name
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
-  _.sortBy = function (collection, iterator) {
+  _.sortBy = (collection, iterator) => {
+    return collection.sort((a, b) => {
+      if (typeof iterator === 'function') {
+        return iterator(a) > iterator(b);
+      }
+      return a[iterator] > b[iterator];
+    });
   };
 
   // Zip together two or more arrays with elements of the same index
@@ -339,24 +345,50 @@
   //
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
-  _.zip = function () {
+  _.zip = (...args) => {
+    const copyArgs = args.sort((a, b) => a.length < b.length); // descending order by length
+    const results = [];
+    _.each(copyArgs[0], (item, index) => {
+      const temp = [];
+      _.each(args, arg => temp.push(arg[index]));
+      results.push(temp);
+    });
+    return results;
   };
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
   // The new array should contain all elements of the multidimensional array.
   //
   // Hint: Use Array.isArray to check if something is an array
-  _.flatten = function (nestedArray, result) {
+  _.flatten = (nestedArray, result = []) => {
+    if (Array.isArray(nestedArray)) {
+      _.each(nestedArray, item => {
+        result = [...result, ..._.flatten(item)];
+      });
+      return result;
+    } else {
+      return [nestedArray];
+    }
   };
 
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
-  _.intersection = function () {
+  _.intersection = (first, ...rest) => {
+    return _.filter(first, item => {
+      return _.every(rest, arg => {
+        return _.some(arg, el => el === item);
+      });
+    });
   };
 
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
-  _.difference = function (array) {
+  _.difference = (first, ...rest) => {
+    return _.filter(first, item => {
+      return _.every(rest, arg => {
+        return _.every(arg, el => el !== item);
+      });
+    });
   };
 
   // Returns a function, that, when invoked, will only be triggered at most once
