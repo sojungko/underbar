@@ -71,17 +71,17 @@
 
   // Return all elements of an array that pass a truth test.
   _.filter = (collection, test) => {
-    const array = []
-    _.each(collection, item => {
-      if (test(item)) {
-        array.push(item)
+    const array = [];
+    _.each(collection, (item, index, collection) => {
+      if (test(item, index, collection)) {
+        array.push(item);
       }
     });
     return array;
   };
 
   // Return all elements of an array that don't pass a truth test.
-  _.reject = (collection, test) => _.filter(collection, (item) => !test(item));
+  _.reject = (collection, test) => _.filter(collection, (item, index, collection) => !test(item, index, collection));
 
   // Produce a duplicate-free version of the array.
   _.uniq = array => Array.from(new Set(array));
@@ -92,11 +92,11 @@
   // like each(), but in addition to running the operation on all
   // the members, it also maintains an array of results.
   _.map = (collection, iterator) => {
-    const array = []
-    _.each(collection, (item, index) => {
-      array.push(iterator(item));
+    const array = [];
+    _.each(collection, (item, index, collection) => {
+      array.push(iterator(item, index, collection));
     });
-    return array
+    return array;
   };
 
   /*
@@ -108,14 +108,7 @@
   // Takes an array of objects and returns and array of the values of
   // a certain property in it. E.g. take an array of people and return
   // an array of just their ages
-  _.pluck = function (collection, key) {
-    // TIP: map is really handy when you want to transform an array of
-    // values into a new array of values. _.pluck() is solved for you
-    // as an example of this.
-    return _.map(collection, function (item) {
-      return item[key];
-    });
-  };
+  _.pluck = (collection, key) => _.map(collection, (item) => item[key]);
 
   // Reduces an array or object to a single value by repetitively calling
   // iterator(accumulator, item) for each item. accumulator should be
@@ -140,16 +133,16 @@
   _.reduce = (collection, iterator, accumulator) => {
     _.each(collection, (item, index, collection) => {
       if (accumulator === undefined && index === 0) {
-        accumulator = item
+        accumulator = item;
       } else {
-        accumulator = iterator(accumulator, item)
+        accumulator = iterator(accumulator, item, index, collection);
       }
     });
-    return accumulator
+    return accumulator;
   };
 
   // Determine if the array or object contains a given value (using `===`).
-  _.contains = function (collection, target) {
+  _.contains = (collection, target) => {
     // TIP: Many iteration problems can be most easily expressed in
     // terms of reduce(). Here's a freebie to demonstrate!
     return _.reduce(collection, function (wasFound, item) {
@@ -231,20 +224,20 @@
 
   // Return a function that can be called at most one time. Subsequent calls
   // should return the previously returned value.
-  _.once = function (func) {
+  _.once = (func) => {
     // TIP: These variables are stored in a "closure scope" (worth researching),
     // so that they'll remain available to the newly-generated function every
     // time it's called.
-    var alreadyCalled = false;
-    var result;
+    let alreadyCalled = false;
+    let result;
 
     // TIP: We'll return a new function that delegates to the old one, but only
     // if it hasn't been called before.
-    return function () {
+    return (...args) => {
       if (!alreadyCalled) {
         // TIP: .apply(this, arguments) is the standard way to pass on all of the
-        // infromation from one function call to another.
-        result = func.apply(this, arguments);
+        // information from one function call to another.
+        result = func.apply(this, args);
         alreadyCalled = true;
       }
       // The new function always returns the originally computed result.
