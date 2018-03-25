@@ -139,10 +139,11 @@
   //          No accumulator is given so the first element is used.
   _.reduce = (collection, iterator, accumulator) => {
     _.each(collection, (item, index, collection) => {
-      if (accumulator === undefined) {
+      if (accumulator === undefined && index === 0) {
         accumulator = item
+      } else {
+        accumulator = iterator(accumulator, item)
       }
-      accumulator = iterator(accumulator, item)
     });
     return accumulator
   };
@@ -161,14 +162,19 @@
 
 
   // Determine whether all of the elements match a truth test.
-  _.every = function (collection, iterator) {
-    // TIP: Try re-using reduce() here.
+  _.every = (collection, iterator) => {
+    return _.reduce(collection, (accumulator, item) => {
+      if (!accumulator) {
+        return false;
+      }
+      return iterator ? !!iterator(item) : !!item;
+    }, true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
-  _.some = function (collection, iterator) {
-    // TIP: There's a very clever way to re-use every() here.
+  _.some = (collection, iterator) => {
+    return !_.every(collection, (item) => iterator ? !iterator(item) : !item);
   };
 
 
@@ -190,12 +196,28 @@
   //   }, {
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
-  _.extend = function (obj) {
+  _.extend = (obj, ...args) => {
+    _.each(args, arg => {
+      if (typeof arg === 'object' && arg !== null) {
+        _.each(arg, (value, key) => {
+          obj[key] = value;
+        });
+      }
+    });
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
-  _.defaults = function (obj) {
+  _.defaults = (obj, ...args) => {
+    _.each(args, arg => {
+      if (typeof arg === 'object' && arg !== null) {
+        _.each(arg, (value, key) => {
+          obj[key] = obj.hasOwnProperty(key) ? obj[key] : value;
+        });
+      }
+    });
+    return obj;
   };
 
 
@@ -238,7 +260,15 @@
   // _.memoize should return a function that, when called, will check if it has
   // already computed the result for the given argument and return that value
   // instead if possible.
-  _.memoize = function (func) {
+  _.memoize = func => {
+    const results = {};
+    return (...args) => {
+      const stringifiedArg = JSON.stringify(args);
+      if (!results.hasOwnProperty(stringifiedArg)) {
+        results[stringifiedArg] = func.apply(this, args);
+      }
+      return results[stringifiedArg];
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
