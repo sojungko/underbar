@@ -265,7 +265,9 @@
     return (...args) => {
       const stringifiedArg = JSON.stringify(args);
       if (!results.hasOwnProperty(stringifiedArg)) {
-        results[stringifiedArg] = func.apply(this, args);
+        // results[stringifiedArg] = func.apply(null, args); // to pass in args as array
+        // results[stringifiedArg] = func.call(null, ...args); // to pass in args individually
+        results[stringifiedArg] = func(...args);
       }
       return results[stringifiedArg];
     };
@@ -277,7 +279,10 @@
   // The arguments for the original function are passed after the wait
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
-  _.delay = function (func, wait) {
+  _.delay = (func, wait, ...args) => {
+    // setTimeout(() => func.apply(null, args), wait);
+    // setTimeout(() => func.call(null, ...args), wait);
+    setTimeout(() => func(...args), wait);
   };
 
 
