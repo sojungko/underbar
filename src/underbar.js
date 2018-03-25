@@ -396,6 +396,14 @@
   // on this function.
   //
   // Note: This is difficult! It may take a while to implement.
-  _.throttle = function (func, wait) {
+  _.throttle = (func, wait) => {
+    let startTime = new Date();
+    return (...args) => {
+      let endTime = new Date();
+      if (endTime -startTime === 0 || endTime - startTime === wait) {
+        func.apply(null, args);
+        startTime = new Date();
+      }
+    }
   };
 }());
