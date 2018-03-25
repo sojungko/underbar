@@ -296,7 +296,15 @@
   // TIP: This function's test suite will ask that you not modify the original
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
-  _.shuffle = function (array) {
+  _.shuffle = array => {
+    const copy = array.slice();
+    _.each(copy, (item, index, copy) => {
+      const newIndex = Math.floor(Math.random(copy.length));
+      const temp = copy[newIndex];
+      copy[newIndex] = item;
+      copy[index] = temp;
+    });
+    return copy;
   };
 
 
@@ -310,7 +318,13 @@
 
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
-  _.invoke = function (collection, functionOrKey, args) {
+  _.invoke = (collection, functionOrKey, args) => {
+    return _.map(collection, item => {
+      if (typeof functionOrKey === 'function') {
+        return functionOrKey.apply(item);
+      }
+      return String.prototype[functionOrKey].apply(item);
+    });
   };
 
   // Sort the object's values by a criterion produced by an iterator.
